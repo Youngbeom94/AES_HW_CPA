@@ -1,5 +1,6 @@
 #include "header.h"
 
+fuckyou
 FILE* FILE_Trace = NULL;
 FILE* FILE_PT = NULL;
 
