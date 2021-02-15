@@ -39,6 +39,7 @@ int main()
 	}
 	fclose(FILE_PT);
 
+
 	//[Read Trace]*******************************************************************************************************************************
 	for (cnt_i = 0; cnt_i < TRACE_NUM; cnt_i++)
 	{
@@ -50,7 +51,6 @@ int main()
 			fscanf(FILE_Trace, "%lf", &TraceTemp[cnt_i][cnt_j]);
 			//printf("%lf\n", TraceTemp[cnt_i][cnt_j]);
 		}
-		//printf("------------------------------------------------");
 		//printf("\n");
 		//return 0;
 		fclose(FILE_Trace);
@@ -64,12 +64,14 @@ int main()
 
 			for (cnt_k = 0; cnt_k < TRACE_NUM; cnt_k++)
 			{
+				byte before_distance = ciphertext[cnt_k][cnt_j];
 				AddRoundKey_1Round(ciphertext[cnt_k], guess_key);
 				InvSubByte(ciphertext[cnt_k]);
-
+				byte after_distance = ciphertext[cnt_k][cnt_j];
+				HammingDistance[cnt_i][cnt_k][cnt_j] = Find_HammingDistance(before_distance, after_distance);
+				
 			}
 		}
-		break;
 	}
 
 

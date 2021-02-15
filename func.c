@@ -100,3 +100,20 @@ void AddRoundKey_1Round(unsigned char* state, unsigned char* key)
 
 }
 
+byte Find_HammingDistance(unsigned char before_distance, unsigned char after_distance)
+{
+    byte temp = before_distance ^ after_distance;
+    byte count = 0;
+    int cnt_i = 0;
+    
+    printf("temp = %02X\n", temp);
+    for (cnt_i = 0; cnt_i < 8; cnt_i++)
+    {
+        if (((temp >> cnt_i) & 0x01) == 1)
+        {
+            count++;
+        }
+    }
+    printf("%x\n", count);
+}
+
