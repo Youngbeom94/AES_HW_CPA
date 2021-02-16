@@ -17,7 +17,6 @@ float Sum_yy[S_BOX][TRACE_LENGTH] = { 0x00, };
 float Sum_Ey[S_BOX][TRACE_LENGTH] = { 0x00, };
 
 
-
 int main()
 {
 	int cnt_i = 0, cnt_j = 0, cnt_k = 0;
