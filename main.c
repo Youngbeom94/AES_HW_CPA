@@ -3,6 +3,7 @@
 FILE* FILE_Trace = NULL;
 FILE* FILE_PT = NULL;
 
+byte temp = 0;
 byte ciphertext[TRACE_NUM][AES_PLANETXT_LEN] = { 0x00, };
 byte buffer[64] = { 0, };
 byte HammingDistance[AES_PLANETXT_LEN][TRACE_NUM][GUESSKEY];
@@ -11,11 +12,11 @@ char str[256] = { 0, };
 
 float Corr[S_BOX][TRACE_LENGTH][GUESSKEY] = { 0x00, };
 double TraceTemp[TRACE_NUM][TRACE_LENGTH] = { 0x00, };
-double sum_xy[GUESSKEY][TRACE_LENGTH] = { 0x00 };
+double Sum_xy[S_BOX][GUESSKEY][TRACE_LENGTH] = { 0x00, };
 double Sum_xx[TRACE_LENGTH] = { 0x00, };
 double Sum_Ex[TRACE_LENGTH] = { 0x00, };
-float Sum_yy[S_BOX][TRACE_LENGTH] = { 0x00, };
-float Sum_Ey[S_BOX][TRACE_LENGTH] = { 0x00, };
+float Sum_yy[S_BOX][GUESSKEY] = { 0x00, };
+float Sum_Ey[S_BOX][GUESSKEY] = { 0x00, };
 
 
 int main()
@@ -30,9 +31,9 @@ int main()
 		fgets(buffer, sizeof(buffer), FILE_PT); //! 한줄씩만 읽는함수
 		convertStr2Byte(buffer, 32, ciphertext[cnt_i]);
 
-		/*for (int j = 0; j < AES_PLANETXT_LEN; j++)
+		/*for (int cnt_j = 0; cnt_j < AES_PLANETXT_LEN; cnt_j++)
 		{
-			printf("%02X ", ciphertext[i][j]);
+			printf("%02X ", ciphertext[cnt_i][cnt_j]);
 		}
 		printf("\n");*/
 
@@ -61,22 +62,60 @@ int main()
 	//[Caluates HammingDistance]*******************************************************************************************************************************
 	for (cnt_i = 0; cnt_i < S_BOX; cnt_i++)
 	{
+		//printf("\n*******[S_BOX %02X]*******\n", cnt_i);
 		for (cnt_j = 0; cnt_j < GUESSKEY; cnt_j++)
 		{
 			guess_key[cnt_i] = cnt_j;
-
+			//printf("\n\n*******[GUESS KEY %02X]*******\n", cnt_j);
 			for (cnt_k = 0; cnt_k < TRACE_NUM; cnt_k++)
 			{
 				byte before_distance = ciphertext[cnt_k][cnt_i];
-				AddRoundKey_1Round(ciphertext[cnt_k], guess_key);
-				InvSubByte(ciphertext[cnt_k]);
-				byte after_distance = ciphertext[cnt_k][cnt_i];
+				temp = ciphertext[cnt_k][cnt_i];
+				temp = rsbox[temp ^ guess_key[cnt_i]];
+				byte after_distance = temp;
 				HammingDistance[cnt_i][cnt_k][cnt_j] = Find_HammingDistance(before_distance, after_distance);
+				//printf("%d ", HammingDistance[cnt_i][cnt_k][cnt_j]);
 			}
 		}
 	}
 	
+	//[Caluates SumEx, xx, Ey, yy]*******************************************************************************************************************************
+	Calculates_SumX(Sum_xx, Sum_Ex, TraceTemp);
+	Calculates_SumY(Sum_yy, Sum_Ey, HammingDistance);
+	Calculates_SumXY(Sum_xy, TraceTemp, HammingDistance);
+
+	//for (cnt_i = 0; cnt_i < S_BOX; cnt_i++)
+	//{
+	//	printf("*****[SBOX %d]****\n", cnt_i);
+	//	for (cnt_j = 0; cnt_j < GUESSKEY; cnt_j++)
+	//	{
+	//		printf("%f\n", Sum_yy[cnt_i][cnt_j]);
+	//	}
+	//}
+
+	//for (cnt_i = 0; cnt_i < S_BOX; cnt_i++)
+	//{
+	//	printf("*****[SBOX %d]****\n", cnt_i);
+	//	for (cnt_j = 0; cnt_j < GUESSKEY; cnt_j++)
+	//	{
+	//		printf("%f\n", Sum_Ey[cnt_i][cnt_j]);
+	//	}
+	//}
+
+	/*for (cnt_i = 0; cnt_i < S_BOX; cnt_i++)
+	{
+		printf("*****[SBOX %d]****\n", cnt_i);
+		for (cnt_j = 0; cnt_j < GUESSKEY; cnt_j++)
+		{
+			printf("*****[GUESSKEY %d]****\n", cnt_j);
+			for (cnt_k = 0; cnt_k < TRACE_LENGTH; cnt_k++)
+			{
+				printf("%lf\n", Sum_xy[cnt_i][cnt_j][cnt_k]);
+			}
+		}
+	}*/
 
 
+	//[Caluates Correlation coefficient]*******************************************************************************************************************************
 	return 0;
 }
