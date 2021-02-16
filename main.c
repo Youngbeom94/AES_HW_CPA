@@ -8,7 +8,8 @@ byte buffer[64] = { 0, };
 byte HammingDistance[AES_PLANETXT_LEN][TRACE_NUM][GUESSKEY];
 byte guess_key[16] = { 0x00, };
 char str[256] = { 0, };
-double Corr[AES_PLANETXT_LEN][TRACE_NUM][GUESSKEY] = { 0x00, };
+
+float Corr[S_BOX][TRACE_LENGTH][GUESSKEY] = { 0x00, };
 double TraceTemp[TRACE_NUM][TRACE_LENGTH] = { 0x00, };
 double sum_xy[GUESSKEY][TRACE_LENGTH] = { 0x00 };
 double Sum_xx[TRACE_LENGTH] = { 0x00, };
@@ -55,6 +56,9 @@ int main()
 		fclose(FILE_Trace);
 	}
 
+
+
+	//[Caluates HammingDistance]*******************************************************************************************************************************
 	for (cnt_i = 0; cnt_i < S_BOX; cnt_i++)
 	{
 		for (cnt_j = 0; cnt_j < GUESSKEY; cnt_j++)
@@ -63,15 +67,15 @@ int main()
 
 			for (cnt_k = 0; cnt_k < TRACE_NUM; cnt_k++)
 			{
-				byte before_distance = ciphertext[cnt_k][cnt_j];
+				byte before_distance = ciphertext[cnt_k][cnt_i];
 				AddRoundKey_1Round(ciphertext[cnt_k], guess_key);
 				InvSubByte(ciphertext[cnt_k]);
-				byte after_distance = ciphertext[cnt_k][cnt_j];
+				byte after_distance = ciphertext[cnt_k][cnt_i];
 				HammingDistance[cnt_i][cnt_k][cnt_j] = Find_HammingDistance(before_distance, after_distance);
-				
 			}
 		}
 	}
+	
 
 
 	return 0;

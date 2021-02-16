@@ -106,7 +106,7 @@ byte Find_HammingDistance(unsigned char before_distance, unsigned char after_dis
     byte count = 0;
     int cnt_i = 0;
     
-    printf("temp = %02X\n", temp);
+    //printf("temp = %02X\n", temp);
     for (cnt_i = 0; cnt_i < 8; cnt_i++)
     {
         if (((temp >> cnt_i) & 0x01) == 1)
@@ -114,6 +114,32 @@ byte Find_HammingDistance(unsigned char before_distance, unsigned char after_dis
             count++;
         }
     }
-    printf("%x\n", count);
+    //printf("%x\n", count);
+}
+
+void Calculates_SumX(float* Sum_xx, float* Sum_Ex, float TraceTemp[TRACE_NUM][TRACE_LENGTH])
+{
+    /*
+     *double Sum_xx[TRACE_LENGTH] = { 0x00, };
+     *double Sum_Ex[TRACE_LENGTH] = { 0x00, };
+     *float TraceTemp[TRACE_NUM][TRACE_LENGTH] = { 0x00, };
+    */
+
+    int cnt_i = 0, cnt_j = 0, cnt_k = 0;
+    double sum_xx = 0x00;
+    double sum_ex = 0x00;
+
+    for (cnt_i = 0; cnt_i < TRACE_LENGTH; cnt_i++)
+    {
+        for (cnt_j = 0; cnt_j < TRACE_NUM; cnt_j++)
+        {
+            sum_ex += TraceTemp[cnt_j][cnt_i];
+            sum_xx += (TraceTemp[cnt_j][cnt_i] * TraceTemp[cnt_j][cnt_i]);
+        }
+        Sum_Ex[cnt_i] = sum_ex;
+        Sum_xx[cnt_i] = sum_xx;
+        sum_ex = 0x00;
+        sum_xx = 0x00;
+    }
 }
 

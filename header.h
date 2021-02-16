@@ -25,5 +25,6 @@ void convertStr2Byte(unsigned char* from, int size, unsigned char* to);
 void InvShiftRow(unsigned char* state);
 void InvSubByte(unsigned char* state);
 void AddRoundKey_1Round(unsigned char* state, unsigned char* key);
+void Calculates_SumX(double* Sum_xx, double* Sum_Ex, float TraceTemp[TRACE_NUM][TRACE_LENGTH]);
 byte Find_HammingDistance(unsigned char before_distance, unsigned char after_distance);
 
