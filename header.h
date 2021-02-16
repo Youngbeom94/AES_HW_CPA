@@ -9,10 +9,10 @@
 #include <memory.h>
 #include <math.h>
 
-#define TRACE_NUM 10000 //20000
+#define TRACE_NUM 20000 //20000
 #define TRACE_LENGTH 3253 //3253
 #define AES_PLANETXT_LEN 16
-#define S_BOX 2 //!
+#define S_BOX 16 //!
 #define GUESSKEY 256
 
 
