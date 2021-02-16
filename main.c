@@ -2,8 +2,9 @@
 
 FILE* FILE_Trace = NULL;
 FILE* FILE_PT = NULL;
+FILE* CPA_peak = NULL;
 
-byte temp = 0;
+byte bytes_value = 0;
 byte ciphertext[TRACE_NUM][AES_PLANETXT_LEN] = { 0x00, };
 byte buffer[64] = { 0, };
 byte HammingDistance[AES_PLANETXT_LEN][TRACE_NUM][GUESSKEY];
@@ -18,10 +19,14 @@ double Sum_Ex[TRACE_LENGTH] = { 0x00, };
 float Sum_yy[S_BOX][GUESSKEY] = { 0x00, };
 float Sum_Ey[S_BOX][GUESSKEY] = { 0x00, };
 
+double co_co[TRACE_LENGTH];
+double MAX_peak[GUESSKEY];
+double temp;
+
 
 int main()
 {
-	int cnt_i = 0, cnt_j = 0, cnt_k = 0;
+	int cnt_i = 0, cnt_j = 0, cnt_k = 0, cnt_s = 0;
 	FILE_PT = fopen("C:\\Users\\YoungBeom Kim\\source\\repos\\AES_HW_trace\\ciphertext.txt", "r");
 	assert(FILE_PT != NULL);
 
@@ -70,9 +75,9 @@ int main()
 			for (cnt_k = 0; cnt_k < TRACE_NUM; cnt_k++)
 			{
 				byte before_distance = ciphertext[cnt_k][cnt_i];
-				temp = ciphertext[cnt_k][cnt_i];
-				temp = rsbox[temp ^ guess_key[cnt_i]];
-				byte after_distance = temp;
+				bytes_value = ciphertext[cnt_k][cnt_i];
+				bytes_value = rsbox[bytes_value ^ guess_key[cnt_i]];
+				byte after_distance = bytes_value;
 				HammingDistance[cnt_i][cnt_k][cnt_j] = Find_HammingDistance(before_distance, after_distance);
 				//printf("%d ", HammingDistance[cnt_i][cnt_k][cnt_j]);
 			}
@@ -117,5 +122,51 @@ int main()
 
 
 	//[Caluates Correlation coefficient]*******************************************************************************************************************************
+
+	for (cnt_i = 0; cnt_i < S_BOX; cnt_i++)
+	{
+		for (cnt_j = 0; cnt_j < GUESSKEY; cnt_j++)
+		{
+			for (cnt_k = 0; cnt_k < TRACE_LENGTH; cnt_k++)
+			{
+				co_co[cnt_k] = ((TRACE_NUM)*Sum_xy[cnt_i][cnt_j][cnt_k] - (Sum_Ex[cnt_k]*Sum_Ey[cnt_i][cnt_j]))/ ((sqrt((TRACE_NUM) * Sum_xx[cnt_k]-(Sum_Ex[cnt_k] * Sum_Ex[cnt_k]))) * (sqrt((double)(TRACE_NUM)*Sum_yy[cnt_i][cnt_j] - ((double)Sum_Ey[cnt_i][cnt_j] * (double)Sum_Ey[cnt_i][cnt_j])))) ;
+			}
+			temp = co_co[0];
+			for (cnt_s = 1; cnt_s < TRACE_LENGTH; cnt_s++)
+			{
+				if (temp < co_co[cnt_s])
+				{
+					temp = co_co[cnt_s];
+				}
+			}
+			MAX_peak[cnt_j] = temp;
+		}
+
+		temp = MAX_peak[0];
+		for (cnt_s = 0; cnt_s < GUESSKEY; cnt_s++)
+		{
+			if (temp <= MAX_peak[cnt_s])
+			{
+				temp = MAX_peak[cnt_s];
+
+				guess_key[cnt_i] = cnt_s;
+			}
+		}
+
+		for (cnt_j = 0; cnt_j < TRACE_LENGTH; cnt_j++)
+		{
+			co_co[cnt_j] = ((TRACE_NUM)*Sum_xy[cnt_i][guess_key[cnt_i]][cnt_j] - (Sum_Ex[cnt_j] * Sum_Ey[cnt_i][guess_key[cnt_i]])) / ((sqrt((TRACE_NUM)*Sum_xx[cnt_j] - (Sum_Ex[cnt_j] * Sum_Ex[cnt_j]))) * (sqrt((double)(TRACE_NUM)*Sum_yy[cnt_i][guess_key[cnt_i]] - ((double)Sum_Ey[cnt_i][guess_key[cnt_i]] * (double)Sum_Ey[cnt_i][guess_key[cnt_i]]))));
+		}
+
+		sprintf(str, "C:\\Users\\YoungBeom Kim\\source\\repos\\AESHW_CPA210215\\CPA_Peak\\CPA_%d_peak_%x.txt", cnt_i, guess_key[cnt_i]);
+		CPA_peak = fopen(str, "w");
+
+		for (cnt_j = 0; cnt_j < TRACE_LENGTH; cnt_j++)
+		{
+			fprintf(CPA_peak, "%lf\n", co_co[cnt_j]);
+		}
+		fclose(CPA_peak);
+	}
+
 	return 0;
 }
