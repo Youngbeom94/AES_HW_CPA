@@ -40,6 +40,28 @@ void convertStr2Byte(unsigned char* from, int size, unsigned char* to)
 
 }
 
+void ShiftRow(unsigned char* state)
+{
+	int temp, temp2;
+	temp = state[13]; //1 bytes Leftshift
+	state[13] = state[1];
+	state[1] = state[5];
+	state[5] = state[9];
+	state[9] = temp;
+
+	temp = state[10]; //2 bytes Leftshift
+	temp2 = state[14];
+	state[10] = state[2];
+	state[14] = state[6];
+	state[2] = temp;
+	state[6] = temp2;
+
+	temp = state[7]; // 3 bytes Leftshift
+	state[7] = state[3];
+	state[3] = state[15];
+	state[15] = state[11];
+	state[11] = temp;
+}
 
 void InvShiftRow(unsigned char* state)
 {

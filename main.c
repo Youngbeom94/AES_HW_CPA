@@ -5,6 +5,7 @@ FILE* FILE_PT = NULL;
 FILE* CPA_peak = NULL;
 
 byte bytes_value = 0;
+byte cipher_array[AES_PLANETXT_LEN] = { 0x00, };
 byte ciphertext[TRACE_NUM][AES_PLANETXT_LEN] = { 0x00, };
 byte buffer[64] = { 0, };
 byte HammingDistance[AES_PLANETXT_LEN][TRACE_NUM][GUESSKEY];
@@ -68,14 +69,19 @@ int main()
 	//[Caluates HammingDistance]*******************************************************************************************************************************
 	for (cnt_i = 0; cnt_i < S_BOX; cnt_i++)
 	{
-		//printf("\n*******[S_BOX %02X]*******\n", cnt_i);
+		//printf("\n*******[S_BOX %02X]*******\n", cnt_i);//!
 		for (cnt_j = 0; cnt_j < GUESSKEY; cnt_j++)
 		{
 			guess_key[cnt_i] = cnt_j;
-			//printf("\n\n*******[GUESS KEY %02X]*******\n", cnt_j);
+			//printf("\n\n*******[GUESS KEY %02X]*******\n", cnt_j);//!
 			for (cnt_k = 0; cnt_k < TRACE_NUM; cnt_k++)
 			{
-				byte before_distance = ciphertext[cnt_k][cnt_i];
+				for (cnt_s = 0; cnt_s < AES_PLANETXT_LEN; cnt_s++)
+				{
+					cipher_array[cnt_s] = ciphertext[cnt_k][cnt_s];
+				}
+				ShiftRow(cipher_array);
+				byte before_distance = cipher_array[cnt_i];
 				bytes_value = ciphertext[cnt_k][cnt_i];
 				bytes_value = rsbox[bytes_value ^ guess_key[cnt_i]];
 				byte after_distance = bytes_value;
@@ -92,6 +98,7 @@ int main()
 	Calculates_SumY(Sum_yy, Sum_Ey, HammingDistance);
 	Calculates_SumXY(Sum_xy, TraceTemp, HammingDistance);
 #endif
+
 
 
 	//[Caluates Correlation coefficient]*******************************************************************************************************************************
@@ -136,7 +143,7 @@ int main()
 			co_co[cnt_j] = ((TRACE_NUM)*Sum_xy[cnt_i][guess_key[cnt_i]][cnt_j] - (Sum_Ex[cnt_j] * Sum_Ey[cnt_i][guess_key[cnt_i]])) / ((sqrt((TRACE_NUM)*Sum_xx[cnt_j] - (Sum_Ex[cnt_j] * Sum_Ex[cnt_j]))) * (sqrt((double)(TRACE_NUM)*Sum_yy[cnt_i][guess_key[cnt_i]] - ((double)Sum_Ey[cnt_i][guess_key[cnt_i]] * (double)Sum_Ey[cnt_i][guess_key[cnt_i]]))));
 #endif
 		}
-		sprintf(str, "C:\\Users\\YoungBeom Kim\\source\\repos\\AESHW_CPA210215\\CPA_Peak\\!CPA_%d_peak_%x.txt", cnt_i, guess_key[cnt_i]);
+		sprintf(str, "C:\\Users\\YoungBeom Kim\\source\\repos\\AESHW_CPA210215\\CPA_Peak\\CPA_%d_peak_%x.txt", cnt_i, guess_key[cnt_i]);
 		CPA_peak = fopen(str, "w");
 
 		for (cnt_j = 0; cnt_j < TRACE_LENGTH; cnt_j++)
@@ -149,39 +156,4 @@ int main()
 	return 0;
 }
 
-//for (cnt_i = 0; cnt_i < TRACE_LENGTH; cnt_i++)
-	//{
-	//	printf("%f\n", Sum_xx[cnt_i]);
-	//
-	//}
 
-	//for (cnt_i = 0; cnt_i < S_BOX; cnt_i++)
-	//{
-	//	printf("*****[SBOX %d]****\n", cnt_i);
-	//	for (cnt_j = 0; cnt_j < GUESSKEY; cnt_j++)
-	//	{
-	//		printf("%f\n", Sum_yy[cnt_i][cnt_j]);
-	//	}
-	//}
-
-	//for (cnt_i = 0; cnt_i < S_BOX; cnt_i++)
-	//{
-	//	printf("*****[SBOX %d]****\n", cnt_i);
-	//	for (cnt_j = 0; cnt_j < GUESSKEY; cnt_j++)
-	//	{
-	//		printf("%f\n", Sum_Ey[cnt_i][cnt_j]);
-	//	}
-	//}
-
-	/*for (cnt_i = 0; cnt_i < S_BOX; cnt_i++)
-	{
-		printf("*****[SBOX %d]****\n", cnt_i);
-		for (cnt_j = 0; cnt_j < GUESSKEY; cnt_j++)
-		{
-			printf("*****[GUESSKEY %d]****\n", cnt_j);
-			for (cnt_k = 0; cnt_k < TRACE_LENGTH; cnt_k++)
-			{
-				printf("%lf\n", Sum_xy[cnt_i][cnt_j][cnt_k]);
-			}
-		}
-	}*/
