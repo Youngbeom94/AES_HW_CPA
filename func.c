@@ -127,6 +127,7 @@ void Calculates_SumX(double* Sum_xx, double* Sum_Ex, double TraceTemp[TRACE_NUM]
 	}
 }
 
+
 void Calculates_SumY(float Sum_yy[S_BOX][GUESSKEY], float Sum_Ey[S_BOX][GUESSKEY], byte HammingDistance[S_BOX][TRACE_NUM][GUESSKEY])
 {
   /*

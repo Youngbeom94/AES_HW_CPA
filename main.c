@@ -19,6 +19,7 @@ double Sum_Ex[TRACE_LENGTH] = { 0x00, };
 float Sum_yy[S_BOX][GUESSKEY] = { 0x00, };
 float Sum_Ey[S_BOX][GUESSKEY] = { 0x00, };
 
+
 double co_co[TRACE_LENGTH];
 double MAX_peak[GUESSKEY];
 double temp;
@@ -85,11 +86,70 @@ int main()
 	}
 	
 	//[Caluates SumEx, xx, Ey, yy]*******************************************************************************************************************************
+
+#ifndef ANOTHERCOOR
 	Calculates_SumX(Sum_xx, Sum_Ex, TraceTemp);
 	Calculates_SumY(Sum_yy, Sum_Ey, HammingDistance);
 	Calculates_SumXY(Sum_xy, TraceTemp, HammingDistance);
+#endif
 
-	//for (cnt_i = 0; cnt_i < TRACE_LENGTH; cnt_i++)
+
+	//[Caluates Correlation coefficient]*******************************************************************************************************************************
+	for (cnt_i = 0; cnt_i < S_BOX; cnt_i++)
+	{
+		//printf("\n*******[S_BOX %02X]*******\n", cnt_i);
+		for (cnt_j = 0; cnt_j < GUESSKEY; cnt_j++)
+		{
+			//printf("\n*******[GUESSKEY %02X]*******\n", cnt_j);
+			for (cnt_k = 0; cnt_k < TRACE_LENGTH; cnt_k++)
+			{
+#ifndef ANOTHERCOOR
+				co_co[cnt_k] = ((TRACE_NUM)*Sum_xy[cnt_i][cnt_j][cnt_k] - (Sum_Ex[cnt_k]*Sum_Ey[cnt_i][cnt_j]))/ ((sqrt((TRACE_NUM) * Sum_xx[cnt_k]-(Sum_Ex[cnt_k] * Sum_Ex[cnt_k]))) * (sqrt((double)(TRACE_NUM)*Sum_yy[cnt_i][cnt_j] - ((double)Sum_Ey[cnt_i][cnt_j] * (double)Sum_Ey[cnt_i][cnt_j])))) ;
+#endif
+			}
+			temp = co_co[0];
+			for (cnt_s = 1; cnt_s < TRACE_LENGTH; cnt_s++)
+			{
+				if (temp < co_co[cnt_s])
+				{
+					temp = co_co[cnt_s];
+				}
+			}
+			MAX_peak[cnt_j] = temp;
+			//printf("MAXpeak : %lf\n", MAX_peak[cnt_j]);
+		}
+
+		temp = MAX_peak[0];
+		for (cnt_s = 0; cnt_s < GUESSKEY; cnt_s++)
+		{
+			if (temp <= MAX_peak[cnt_s])
+			{
+				temp = MAX_peak[cnt_s];
+				guess_key[cnt_i] = cnt_s;
+				//printf("%02X\n", guess_key[cnt_j]);
+			}
+		}
+
+		for (cnt_j = 0; cnt_j < TRACE_LENGTH; cnt_j++)
+		{
+#ifndef ANOTHERCOOR
+			co_co[cnt_j] = ((TRACE_NUM)*Sum_xy[cnt_i][guess_key[cnt_i]][cnt_j] - (Sum_Ex[cnt_j] * Sum_Ey[cnt_i][guess_key[cnt_i]])) / ((sqrt((TRACE_NUM)*Sum_xx[cnt_j] - (Sum_Ex[cnt_j] * Sum_Ex[cnt_j]))) * (sqrt((double)(TRACE_NUM)*Sum_yy[cnt_i][guess_key[cnt_i]] - ((double)Sum_Ey[cnt_i][guess_key[cnt_i]] * (double)Sum_Ey[cnt_i][guess_key[cnt_i]]))));
+#endif
+		}
+		sprintf(str, "C:\\Users\\YoungBeom Kim\\source\\repos\\AESHW_CPA210215\\CPA_Peak\\!CPA_%d_peak_%x.txt", cnt_i, guess_key[cnt_i]);
+		CPA_peak = fopen(str, "w");
+
+		for (cnt_j = 0; cnt_j < TRACE_LENGTH; cnt_j++)
+		{
+			fprintf(CPA_peak, "%lf\n", co_co[cnt_j]);
+		}
+		fclose(CPA_peak);
+	}
+
+	return 0;
+}
+
+//for (cnt_i = 0; cnt_i < TRACE_LENGTH; cnt_i++)
 	//{
 	//	printf("%f\n", Sum_xx[cnt_i]);
 	//
@@ -125,57 +185,3 @@ int main()
 			}
 		}
 	}*/
-
-
-	//[Caluates Correlation coefficient]*******************************************************************************************************************************
-
-	for (cnt_i = 0; cnt_i < S_BOX; cnt_i++)
-	{
-		//printf("\n*******[S_BOX %02X]*******\n", cnt_i);
-		for (cnt_j = 0; cnt_j < GUESSKEY; cnt_j++)
-		{
-			//printf("\n*******[GUESSKEY %02X]*******\n", cnt_j);
-			for (cnt_k = 0; cnt_k < TRACE_LENGTH; cnt_k++)
-			{
-				co_co[cnt_k] = ((TRACE_NUM)*Sum_xy[cnt_i][cnt_j][cnt_k] - (Sum_Ex[cnt_k]*Sum_Ey[cnt_i][cnt_j]))/ ((sqrt((TRACE_NUM) * Sum_xx[cnt_k]-(Sum_Ex[cnt_k] * Sum_Ex[cnt_k]))) * (sqrt((double)(TRACE_NUM)*Sum_yy[cnt_i][cnt_j] - ((double)Sum_Ey[cnt_i][cnt_j] * (double)Sum_Ey[cnt_i][cnt_j])))) ;
-			}
-			temp = co_co[0];
-			for (cnt_s = 1; cnt_s < TRACE_LENGTH; cnt_s++)
-			{
-				if (temp < co_co[cnt_s])
-				{
-					temp = co_co[cnt_s];
-				}
-			}
-			MAX_peak[cnt_j] = temp;
-			//printf("MAXpeak : %lf\n", MAX_peak[cnt_j]);
-		}
-
-		temp = MAX_peak[0];
-		for (cnt_s = 0; cnt_s < GUESSKEY; cnt_s++)
-		{
-			if (temp <= MAX_peak[cnt_s])
-			{
-				temp = MAX_peak[cnt_s];
-				guess_key[cnt_i] = cnt_s;
-				//printf("%02X\n", guess_key[cnt_j]);
-			}
-		}
-
-		for (cnt_j = 0; cnt_j < TRACE_LENGTH; cnt_j++)
-		{
-			co_co[cnt_j] = ((TRACE_NUM)*Sum_xy[cnt_i][guess_key[cnt_i]][cnt_j] - (Sum_Ex[cnt_j] * Sum_Ey[cnt_i][guess_key[cnt_i]])) / ((sqrt((TRACE_NUM)*Sum_xx[cnt_j] - (Sum_Ex[cnt_j] * Sum_Ex[cnt_j]))) * (sqrt((double)(TRACE_NUM)*Sum_yy[cnt_i][guess_key[cnt_i]] - ((double)Sum_Ey[cnt_i][guess_key[cnt_i]] * (double)Sum_Ey[cnt_i][guess_key[cnt_i]]))));
-		}
-
-		sprintf(str, "C:\\Users\\YoungBeom Kim\\source\\repos\\AESHW_CPA210215\\CPA_Peak\\!CPA_%d_peak_%x.txt", cnt_i, guess_key[cnt_i]);
-		CPA_peak = fopen(str, "w");
-
-		for (cnt_j = 0; cnt_j < TRACE_LENGTH; cnt_j++)
-		{
-			fprintf(CPA_peak, "%lf\n", co_co[cnt_j]);
-		}
-		fclose(CPA_peak);
-	}
-
-	return 0;
-}

@@ -1,5 +1,8 @@
 #pragma once
 #define _CRT_SECURE_NO_WARNINGS
+//#define ANOTHERCOOR
+
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +15,7 @@
 #define TRACE_NUM 20000 //20000
 #define TRACE_LENGTH 3253 //3253
 #define AES_PLANETXT_LEN 16
-#define S_BOX 16 //!
+#define S_BOX 16 
 #define GUESSKEY 256
 
 
@@ -24,11 +27,16 @@ void convertStr2Byte(unsigned char* from, int size, unsigned char* to);
 
 void InvSubByte(unsigned char* state);
 void AddRoundKey_1Round(unsigned char* state, unsigned char* key);
-
 void Calculates_SumX(double* Sum_xx, double* Sum_Ex, double TraceTemp[TRACE_NUM][TRACE_LENGTH]);
 void Calculates_SumY(float Sum_yy[S_BOX][GUESSKEY], float Sum_Ey[S_BOX][GUESSKEY], byte HammingDistance[S_BOX][TRACE_NUM][GUESSKEY]);
 void Calculates_SumXY(double Sum_xy[S_BOX][GUESSKEY][TRACE_LENGTH], double TraceTemp[TRACE_NUM][TRACE_LENGTH], byte HammingDistance[S_BOX][TRACE_NUM][GUESSKEY]);
 byte Find_HammingDistance(unsigned char before_distance, unsigned char after_distance);
+
+#ifdef ANOTHERCOOR
+void Calculates_SumX_ver2(double* sumden_x, double TraceTemp[TRACE_NUM][TRACE_LENGTH]);
+void Calculates_SumY_ver2(float sumden_y[S_BOX][GUESSKEY], byte HammingDistance[S_BOX][TRACE_NUM][GUESSKEY]);
+void Calculates_SumXY_ver2(double Sum_xy[S_BOX][GUESSKEY][TRACE_LENGTH], double TraceTemp[TRACE_NUM][TRACE_LENGTH], byte HammingDistance[S_BOX][TRACE_NUM][GUESSKEY]);
+#endif
 
 static const unsigned char rsbox[256] = {
 	0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
